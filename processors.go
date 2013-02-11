@@ -22,7 +22,7 @@ type Processor struct {
 
 // PreProcessors is a list of processor necessary to be executed beforehand to
 // fill out information, which can be required by fellow pages
-var PreProcessors = CommandList{"config", "rename", "ext", "directorify",
+var PreProcessors = CommandList{"config", "intro", "rename", "ext", "directorify",
 	"tags", "ignore"}
 
 var Processors map[string]*Processor
@@ -68,6 +68,10 @@ func InitProcessors() {
 		"config": &Processor{
 			ProcessConfig,
 			"read config from content (separated by '----\\n')",
+		},
+		"intro": &Processor{
+			ProcessIntro,
+			"read intro from content (separated by '----\\n')",
 		},
 		"tags": &Processor{
 			ProcessTags,
@@ -216,6 +220,23 @@ func ProcessConfig(page *Page, args []string) {
 
 	page.PageHeader = *ParseHeader(parts[0])
 	page.SetContent(parts[1])
+}
+
+func ProcessIntro(page *Page, args []string) {
+	parts := strings.SplitN(page.Content(), "----\n", 2)
+
+	if len(parts) != 2 {
+		// no intro, use entire post instead
+		page.Other["Intro"] = page.Content()
+	} else {
+		page.Other["Intro"] = parts[0]
+		page.SetContent(parts[1])
+	}
+
+	if len(args) > 0 && args[0] == "markdown" {
+		page.Other["Intro"] = Markdown(page.Other["Intro"])
+	}
+
 }
 
 func ProcessTags(page *Page, args []string) {
