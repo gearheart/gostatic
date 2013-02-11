@@ -199,6 +199,16 @@ func (pages PageSlice) First() *Page    { return pages.Get(0) }
 func (pages PageSlice) Last() *Page     { return pages.Get(len(pages) - 1) }
 
 func (pages PageSlice) Slice(from int, to int) PageSlice {
+	length := pages.Len()
+
+	if from > length {
+		from = length
+	}
+
+	if to > length {
+		to = length
+	}
+
 	return pages[from:to]
 }
 
